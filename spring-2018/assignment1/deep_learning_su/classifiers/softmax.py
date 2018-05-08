@@ -23,18 +23,28 @@ def softmax_loss_naive(W, X, y, reg):
   # Initialize the loss and gradient to zero.
   loss = 0.0
   dW = np.zeros_like(W)
-
+  num_train = X.shape[0]
   #############################################################################
   # TODO: Compute the softmax loss and its gradient using explicit loops.     #
   # Store the loss in loss and the gradient in dW. If you are not careful     #
   # here, it is easy to run into numeric instability. Don't forget the        #
   # regularization!                                                           #
   #############################################################################
-  pass
+  for i in xrange(num_train):
+    scores = np.dot(X[i],W)
+    scores -= np.max(scores)
+    exp_sum= sum(np.exp(scores))
+    correct_score_exp = np.exp(scores[y[i]])
+    loss += -np.log(correct_score_exp / exp_sum)
+    for j in xrange(W.shape[1]):
+        dW[:, j] += X[i] * np.exp(scores[j]) / exp_sum
+    dW[:, y[i]] += -X[i]
+    
+  dW = dW / num_train + 2*reg*W
+  loss = loss / num_train + reg * np.sum(W*W)
   #############################################################################
   #                          END OF YOUR CODE                                 #
   #############################################################################
-
   return loss, dW
 
 
@@ -54,7 +64,16 @@ def softmax_loss_vectorized(W, X, y, reg):
   # here, it is easy to run into numeric instability. Don't forget the        #
   # regularization!                                                           #
   #############################################################################
-  pass
+  scores = np.dot(X,W)
+  scores -= np.max(scores)
+  exp_sum = np.sum(np.exp(scores), axis=1)
+  correct_score_exp = np.exp(scores[np.arange(y.shape[0]), y])
+  loss = np.sum(-np.log(correct_score_exp / exp_sum)) / X.shape[0] + reg * np.sum(W*W) 
+  
+  d = np.exp(scores) / exp_sum[:, np.newaxis]
+  d[np.arange(y.shape[0]), y] = (correct_score_exp - exp_sum) / exp_sum
+  dW = np.dot(X.T, d)
+  dW = dW / X.shape[0] + 2*reg*W
   #############################################################################
   #                          END OF YOUR CODE                                 #
   #############################################################################

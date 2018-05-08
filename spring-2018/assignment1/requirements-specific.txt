@@ -1,0 +1,4 @@
+gnureadline==6.3.3
+numpy==1.10.4
+scipy==0.16
+Pillow==3.0.0
